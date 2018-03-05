@@ -5,11 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Request;
 use App\Services\VehicleService;
-use Exception;
 
-
+/**
+ * Vehicle controller class.
+ */
 class VehicleController extends Controller
 {
+    /**
+     * Format the data returned by the controller.
+     *
+     * @param [array] $data
+     * @return json
+     */
     private function makeResponse($data) {
         return Response::json(
             (object) [
@@ -20,34 +27,34 @@ class VehicleController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get vehicles.
+     *
+     * @param [string] $year
+     * @param [string] $manufacturer
+     * @param [string] $model
+     * @return json
      */
     public function getVehicle($year, $manufacturer, $model)
     {
-        $service = new VehicleService();
-
-        $vehicles = $service->getVehicles($year, $manufacturer, $model);
-        if (Request::input('withRating') === "true") {
-            $vehicles = array_map(function ($vehicle) use (&$service) {
-                $vehicle->CrashRating = $service->getVehicleCrashRating($vehicle->VehicleId);
-                return $vehicle;
-            }, $vehicles);
-        }
+        $vehicles = (new VehicleService())
+            ->getVehicles($year, $manufacturer, $model, (bool) (Request::input('withRating') === "true"));
 
         return $this->makeResponse($vehicles);
     }
 
     /**
-     * Display the specified resource.
+     * Return vehicles by content body.
+     *
+     * @return json
      */
     public function postVehicle()
     {   
-        $service = new VehicleService();
-        $vehicles = $service->getVehicles(
-            Request::input('modelYear'),
-            Request::input('manufacturer'),
-            Request::input('model')
-        );
+        $vehicles = (new VehicleService())
+            ->getVehicles(
+                Request::input('modelYear'),
+                Request::input('manufacturer'),
+                Request::input('model')
+            );
        
         return $this->makeResponse($vehicles);
     }
