@@ -37,7 +37,7 @@ class VehicleController extends Controller
     public function getVehicle($year, $manufacturer, $model)
     {
         $vehicles = (new VehicleService())
-            ->getVehicles($year, $manufacturer, $model, (bool) (Request::input('withRating') === "true"));
+            ->getVehicles($year, $manufacturer, $model, (bool) (Request::input('withRating') === 'true'));
 
         return $this->makeResponse($vehicles);
     }

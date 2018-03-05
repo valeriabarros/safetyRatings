@@ -11,7 +11,7 @@ use Exception;
  */
 class VehicleService 
 {
-    const API_URL = "https://one.nhtsa.gov/webapi/api/SafetyRatings/";
+    const API_URL = 'https://one.nhtsa.gov/webapi/api/SafetyRatings/';
     private $client;
 
     public function __construct()
