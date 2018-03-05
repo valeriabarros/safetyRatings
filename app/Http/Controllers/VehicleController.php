@@ -43,17 +43,12 @@ class VehicleController extends Controller
     public function postVehicle()
     {   
         $service = new VehicleService();
-
-        $vehicles = array();
-        try {
-            $vehicles = $service->getVehicles(
-                Request::input('modelYear'),
-                Request::input('manufacturer'),
-                Request::input('model')
-            );
-        }
-        catch(Exception $e) {}
-
+        $vehicles = $service->getVehicles(
+            Request::input('modelYear'),
+            Request::input('manufacturer'),
+            Request::input('model')
+        );
+       
         return $this->makeResponse($vehicles);
     }
 }

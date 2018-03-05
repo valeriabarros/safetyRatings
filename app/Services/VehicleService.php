@@ -18,7 +18,7 @@ class VehicleService
     public function getVehicles($year, $manufacturer, $model)
     {
         if (empty($year) || empty($manufacturer) || empty($model)) 
-            throw new Exception("Invalid Input");
+            return array();
         
         $response = $this->client->get(self::API_URL . "modelyear/{$year}/make/{$manufacturer}/model/{$model}?format=json");
 
