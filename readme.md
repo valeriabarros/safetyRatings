@@ -13,7 +13,7 @@ Access the URL shown in the output, for example: `127.0.0.1:8000`
 
 ## Routes
 
-POST /vehicles
+POST ```/vehicles```
 
   > payload example:
    ```javascript 
