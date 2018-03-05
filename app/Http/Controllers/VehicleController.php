@@ -5,71 +5,55 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Request;
 use App\Services\VehicleService;
+use Exception;
 
 
 class VehicleController extends Controller
 {
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function getVehicle($year, $manufacturer, $model)
-    {
-        $vehicles = VehicleService::getVehicles($year, $manufacturer, $model);       
-        
-        $result = (object) [
-            'Count' => $vehicles->Count,
-            'Results' => array_map(function($item) {
-                return (object) [
-                    'Description' => $item->VehicleDescription,
-                    'VehicleId' => $item->VehicleId
-                ];
-            }, $vehicles->Results)
-        ];
-
-        if (Request::input('withRating') === "true") {
-            
-            $ratings = [];
-            foreach ($result->Results as $key => $vehicle) {
-               $info = VehicleService::getVehicleInfo($vehicle->VehicleId);
-               $ratings[$vehicle->VehicleId] = $info->Results[0]->OverallRating;
-            }
-
-            $result->Results = array_map(function($item) use (&$ratings) {
-                $item->CrashRating = $ratings[$item->VehicleId];
-                return $item;
-            }, $result->Results);
-        }
-
-        return Response::json($result);
-
+    private function makeResponse($data) {
+        return Response::json(
+            (object) [
+                'Count' => count($data),
+                'Results' => $data
+            ]
+        );
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     */
+    public function getVehicle($year, $manufacturer, $model)
+    {
+        $service = new VehicleService();
+
+        $vehicles = $service->getVehicles($year, $manufacturer, $model);
+        if (Request::input('withRating') === "true") {
+            $vehicles = array_map(function ($vehicle) use (&$service) {
+                $vehicle->CrashRating = $service->getVehicleCrashRating($vehicle->VehicleId);
+                return $vehicle;
+            }, $vehicles);
+        }
+
+        return $this->makeResponse($vehicles);
+    }
+
+    /**
+     * Display the specified resource.
      */
     public function postVehicle()
     {   
-       $year = Request::input('modelYear');
-       $manufacturer = Request::input('manufacturer');
-       $model = Request::input('model');
-       $vehicles = VehicleService::getVehicles($year, $manufacturer, $model);
+        $service = new VehicleService();
 
-        $result = (object) [
-            'Count' => $vehicles->Count,
-            'Results' => array_map(function($item) {
-                return (object) [
-                    'Description' => $item->VehicleDescription,
-                    'VehicleId' => $item->VehicleId
-                ];
-            }, $vehicles->Results)
-        ];
+        $vehicles = array();
+        try {
+            $vehicles = $service->getVehicles(
+                Request::input('modelYear'),
+                Request::input('manufacturer'),
+                Request::input('model')
+            );
+        }
+        catch(Exception $e) {}
 
-        return Response::json($result);
+        return $this->makeResponse($vehicles);
     }
 }
